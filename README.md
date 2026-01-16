@@ -1,6 +1,6 @@
 # PAC-Comp
 
-A repository that houses my PAC comp experiment.
+A repository that houses my comp experiment that is based on the pac website and stats
 
 ---
 
@@ -30,14 +30,21 @@ By organizing all PAC stats into a single dataset, this project creates opportun
 Everything was ran from terminal/VS Code
 
 ## Steps to Run
+### 1. Make sure UV is installed, after run
 
-### 1. Install Dependencies
+```
+uv init
+```
+
+### 2. Install Dependencies
 
 After creating and activating your virtual environment, install the required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
+Other options below
+
 ### Using Toml (use when in root location of toml)
 ```
 pip install .
@@ -45,14 +52,15 @@ pip install .
 ```
 python -m pip install .
 ```
-### 2. Scrape and Store data
+### 3. Scrape and Store data
 ```
-python grabber.py
+uv run grabber.py
 ```
-### 3. Website/player search creation
+### 4. Website/player search creation
 ```
 streamlit run seeker.py
 ```
 ## Success
 You will know you have done everything correct if you greeted with a seach bar that lets you type playes stats in after running step 3. 
+
 
