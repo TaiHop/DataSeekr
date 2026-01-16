@@ -49,9 +49,10 @@ python -m pip install .
 ```
 python grabber.py
 ```
-### 3. 
+### 3. Website/player search creation
 ```
 streamlit run seeker.py
 ```
 ## Success
 You will know you have done everything correct if you greeted with a seach bar that lets you type playes stats in after running step 3. 
+
