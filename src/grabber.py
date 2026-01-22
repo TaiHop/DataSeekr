@@ -1,7 +1,7 @@
 import time
 import csv
 from typing import List
-from src.code import csv_to_db
+from code import csv_to_db
 from bs4 import BeautifulSoup  # type: ignore
 from selenium import webdriver  # type: ignore
 from selenium.webdriver.chrome.service import Service  # type: ignore

@@ -1,12 +1,11 @@
-from sqlalchemy import create_engine, text  # type: ignore
-import pandas as pd  # type: ignore
+from sqlalchemy import create_engine, text
+import pandas as pd
 import re
+import os
 
 
 def safe_table_name(name: str) -> str:
-    """
-    SQLite table names cannot start with a number or contain special chars.
-    """
+    """SQLite table names cannot start with a number or contain special chars."""
     name = name.lower().replace(".csv", "")
     name = re.sub(r"[^a-zA-Z0-9_]", "_", name)
     if name[0].isdigit():
@@ -14,7 +13,14 @@ def safe_table_name(name: str) -> str:
     return name
 
 
-def csv_to_db(csv_file: str, table_name: str, db_path: str = "db/bb_stats.db"):
+def csv_to_db(csv_file: str, table_name: str, db_path: str = None):
+    # Use a safe default folder outside OneDrive if not provided
+    if db_path is None:
+        db_path = os.path.join(os.path.expanduser("~"), "Documents", "bb_stats.db")
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
     engine = create_engine(f"sqlite:///{db_path}")
     df = pd.read_csv(csv_file)
 
@@ -61,3 +67,4 @@ def csv_to_db(csv_file: str, table_name: str, db_path: str = "db/bb_stats.db"):
         )
 
     print(f"📦 Loaded {csv_file} → '{table_name}' ({len(df)} rows)")
+    print(f"📁 Database path: {db_path}")

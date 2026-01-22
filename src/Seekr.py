@@ -1,65 +1,66 @@
 import sqlite3
+import streamlit as st  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
-import streamlit as st           # type: ignore
+from matplotlib import ticker  # type: ignore
 
-# --- adapted search function ---
+st.set_page_config(page_title="Dataseekr Player Search", page_icon="⚾")
+
+st.title("⚾ Dataseekr Player Search")
+
+DB_PATH = "bb_stats.db"
+
+st.write("Database file:", DB_PATH)
 
 
 def search_player_by_name(name: str):
-    conn = sqlite3.connect('bb_stats.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM players WHERE LOWER(name) = LOWER(?)", (name,))
-    players = cursor.fetchall()
+    cursor.execute(
+        """
+        SELECT id, name, school, ba, era, year
+        FROM players
+        WHERE LOWER(name) LIKE LOWER(?)
+        ORDER BY year
+        """,
+        (f"%{name}%",)
+    )
+
+    rows = cursor.fetchall()
     conn.close()
 
-    if not players:
-        st.warning(f"No player found with the name '{name}'.")
+    st.write("Rows returned:", len(rows))  # 🔍 DEBUG
+
+    if not rows:
+        st.warning("No matching players found.")
         return
 
-    years = []
-    batting_averages = []
+    years, bas = [], []
 
-    for player in players:
-        player_id, pname, school, ba, era, year = player
+    for r in rows:
+        _, name, school, ba, era, year = r
+        st.subheader(f"{name} ({year})")
+        st.write(f"School: {school}")
+        st.write(f"BA: {ba} | ERA: {era}")
+        st.divider()
 
-        # Display player info
-        st.subheader(f"Player: {pname}")
-        st.write(f"**ID:** {player_id}")
-        st.write(f"**School:** {school}")
-        st.write(f"**Batting Average:** {ba}")
-        st.write(f"**ERA:** {era}")
-        st.write(f"**Year:** {year}")
-        st.markdown("---")
-
-        # Collect data for plotting
         try:
-            ba_value = float(ba)
-            year_value = int(year)
-            batting_averages.append(ba_value)
-            years.append(year_value)
-        except ValueError:
-            pass  # Skip invalid entries
+            years.append(int(year))
+            bas.append(float(ba))
+        except:
+            pass
 
-    # Plot if data exists
-    if years and batting_averages:
-        fig, ax = plt.subplots(figsize=(8, 5))
-        ax.plot(years, batting_averages, marker='o', linestyle='-', color='blue')
-        ax.set_title(f"{name} - Batting Average Over Years")
+    if years and bas:
+        fig, ax = plt.subplots()
+        ax.plot(years, bas, marker="o")
         ax.set_xlabel("Year")
         ax.set_ylabel("Batting Average")
-        ax.set_ylim(0, 1)
-        ax.set_xticks(years)
-        ax.grid(True, linestyle='--', linewidth=0.5)
-        st.pyplot(fig)
-    else:
-        st.info("No valid batting average data available to plot.")
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True, nbins=5))
+        ax.grid(True, linestyle="--", alpha=0.6)
+        st.pyplot(fig)  # Display the figure in Streamlit
 
-# --- Streamlit UI ---
-st.set_page_config(page_title="Baseball Player Search", page_icon="⚾", layout="centered")
-st.title("⚾ Baseball Player Search")
 
-query = st.text_input("Enter the player's name:")
+query = st.text_input("Enter player name")
 
-if query.strip():
-    search_player_by_name(query.strip())
+if query:
+    search_player_by_name(query)
