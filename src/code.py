@@ -1,70 +1,49 @@
-from sqlalchemy import create_engine, text
-import pandas as pd
-import re
-import os
+import sqlite3
+import pandas as pd  # type: ignore
+import os   # type: ignore
+
+# Database will be created in the project folder
+DB_NAME = "statdb.db"
 
 
-def safe_table_name(name: str) -> str:
-    """SQLite table names cannot start with a number or contain special chars."""
-    name = name.lower().replace(".csv", "")
-    name = re.sub(r"[^a-zA-Z0-9_]", "_", name)
-    if name[0].isdigit():
-        name = f"t_{name}"
-    return name
-
-
-def csv_to_db(csv_file: str, table_name: str, db_path: str = None):
-    # Use a safe default folder outside OneDrive if not provided
-    if db_path is None:
-        db_path = os.path.join(os.path.expanduser("~"), "Documents", "bb_stats.db")
-
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
-
-    engine = create_engine(f"sqlite:///{db_path}")
+def csv_to_master_db(csv_file: str, section: str):
+    """
+    Load CSV data into the master database.
+    Automatically creates the table if it doesn't exist.
+    All CSV columns are added as table columns dynamically.
+    """
     df = pd.read_csv(csv_file)
 
-    # Normalize column names
+    # Lowercase all columns for consistency
     df.columns = df.columns.str.lower()
 
-    # Force the schema we support
-    expected_columns = ["name", "school", "ba", "era", "year"]
-    df = df[[c for c in expected_columns if c in df.columns]]
+    # Ensure 'year' column exists
+    # if "year" not in df.columns:
+    #     df["year"] = 2025  # default year
 
-    # Ensure required columns exist
-    for col in expected_columns:
-        if col not in df.columns:
-            df[col] = None
+    # Connect to local database in project folder
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
 
-    # Type safety
-    df["year"] = pd.to_numeric(df["year"], errors="coerce")
-    df["ba"] = pd.to_numeric(df["ba"], errors="coerce")
-    df["era"] = pd.to_numeric(df["era"], errors="coerce")
+    # Table name per section
+    table_name = f"{section}_stats"
 
-    # Remove exact duplicate stat rows
-    df = df.drop_duplicates(subset=expected_columns)
+    # Dynamically create table columns from CSV
+    columns = df.columns.tolist()
+    col_defs = ", ".join([f"{col} TEXT" for col in columns if col != "id"])
 
-    table_name = safe_table_name(table_name)
+    create_sql = f"""
+    CREATE TABLE IF NOT EXISTS {table_name} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        {col_defs}
+    );
+    """
+    cur.execute(create_sql)
 
-    with engine.begin() as conn:
-        conn.execute(text(f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                school TEXT,
-                ba REAL,
-                era REAL,
-                year INTEGER
-            );
-        """))
+    # Insert CSV data into table
+    df.to_sql(table_name, conn, if_exists="append", index=False)
 
-        df.to_sql(
-            table_name,
-            conn,
-            if_exists="replace",
-            index=False,
-            method="multi"
-        )
+    conn.commit()
+    conn.close()
 
     print(f"📦 Loaded {csv_file} → '{table_name}' ({len(df)} rows)")
-    print(f"📁 Database path: {db_path}")
