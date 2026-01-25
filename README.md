@@ -65,11 +65,12 @@ You will know you have done everything correct, if after running the previous co
 
 #### Note
 
-If you run the grabber locally using  ```uv run grabber.py``` you will be met with a few to many csv files then you would want. Thus I created a clean file that takes 5 second to clean csv files. To run cleaner just run  ```uv run clean.py.
+If you run the grabber locally using  ```uv run grabber.py``` you will be met with a few to many csv files then you would want. Thus I created a clean file that takes 5 second to clean csv files. To run cleaner just run  ```uv run clean.py``` and you can adjust time of cleaner by changing the number housed in the term *time*.
 
 ##### Issue
 
 Please leave any issues in the issue tracker or send me an email at Hopkins02@allegheny.edu
+
 
 
 
