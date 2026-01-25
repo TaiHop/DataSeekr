@@ -10,7 +10,7 @@ def csv_to_master_db(csv_file: str, section: str):
     """
     Load CSV data into the master database.
     Automatically creates the table if it doesn't exist.
-    All CSV columns are added as table columns dynamically.
+    All CSV columns are added as table columns .
     """
     df = pd.read_csv(csv_file)
 
