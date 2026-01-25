@@ -23,14 +23,17 @@ By organizing all PAC stats into a single dataset, this project creates opportun
 - SQLAlchemy  
 - Matplotlib  
 - Streamlit  
+- plotly>=6.3.1
+- webdriver-manager>=4.0
 
 ---
 ## Notice
 
-Everything was ran from terminal/VS Code
+Everything can be run from VS Code terminal
 
 ## Steps to Run
-### 1. Make sure UV is installed, after run
+
+### 1. Make sure UV is installed, after run :
 
 ```
 uv init
@@ -38,29 +41,35 @@ uv init
 
 ### 2. Install Dependencies
 
-After creating and activating your virtual environment, install the required packages:
+After running the command  ```uv init```  it should have created a .toml file and within this file holds the dependencies to run my tool. Then you need to add those to a virtual enviroment (.venv) ; do so my typing the command below :
 
-```bash
-pip install -r requirements.txt
 ```
-Other options below
+uv sync
+```
 
-### Using Toml (use when in root location of toml)
+After running you should encounter something like this :
+
+{}
+
+### 3. Run Website/player search engine:
+
+Make your way to src folder using ```cd src``` following that run :
+
 ```
-pip install .
+streamlit run Seekr.py
 ```
-```
-python -m pip install .
-```
-### 3. Scrape and Store data
-```
-uv run grabber.py
-```
-### 4. Website/player search creation
-```
-streamlit run seeker.py
-```
-## Success
-You will know you have done everything correct if you greeted with a seach bar that lets you type playes stats in after running step 3. 
+
+### Success
+
+You will know you have done everything correct, if after running the previous command you be automatically pulled to the browser at which streamlit is hosting your project.
+
+#### Note
+
+If you run the grabber locally using  ```uv run grabber.py``` you will be met with a few to many csv files then you would want. Thus I created a clean file that takes 5 second to clean csv files. To run cleaner just run  ```uv run clean.py.
+
+##### Issue
+
+Please leave any issues in the issue tracker or send me an email at Hopkins02@allegheny.edu
+
 
 
