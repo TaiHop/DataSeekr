@@ -49,7 +49,7 @@ uv sync
 
 After running you should encounter something like this :
 
-{}
+[vnv popluation](img/readme.png)
 
 ### 3. Run Website/player search engine:
 
@@ -70,6 +70,7 @@ If you run the grabber locally using  ```uv run grabber.py``` you will be met wi
 ##### Issue
 
 Please leave any issues in the issue tracker or send me an email at Hopkins02@allegheny.edu
+
 
 
 
