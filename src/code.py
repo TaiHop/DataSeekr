@@ -1,34 +1,31 @@
 import sqlite3
 import pandas as pd  # type: ignore
-import os   # type: ignore
+import os  # type: ignore
 
-# Database will be created in the project folder
 DB_NAME = "statdb.db"
 
 
 def csv_to_master_db(csv_file: str, section: str):
-    """
-    Load CSV data into the master database.
-    Automatically creates the table if it doesn't exist.
-    All CSV columns are added as table columns .
-    """
     df = pd.read_csv(csv_file)
-
-    # Lowercase all columns for consistency
     df.columns = df.columns.str.lower()
 
-    # Ensure 'year' column exists
-    # if "year" not in df.columns:
-    #     df["year"] = 2025  # default year
+    if "year" not in df.columns:
+        raise ValueError("CSV must include a 'year' column")
 
-    # Connect to local database in project folder
+    # ---- 🔑 derive school if not in CSV ----
+    if "school" in df.columns:
+        schools = df["school"].astype(str).unique().tolist()
+    else:
+        # filename: 2025_wj_hitting.csv → wj
+        base = os.path.basename(csv_file)
+        school_code = base.split("_")[1]
+        schools = [school_code]
+
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
-    # Table name per section
     table_name = f"{section}_stats"
 
-    # Dynamically create table columns from CSV
     columns = df.columns.tolist()
     col_defs = ", ".join([f"{col} TEXT" for col in columns if col != "id"])
 
@@ -40,7 +37,15 @@ def csv_to_master_db(csv_file: str, section: str):
     """
     cur.execute(create_sql)
 
-    # Insert CSV data into table
+    # ---- 🔑 delete ONLY this school + year ----
+    years = df["year"].astype(str).unique().tolist()
+    for year in years:
+        for school in schools:
+            cur.execute(
+                f"DELETE FROM {table_name} WHERE year = ? AND school = ?",
+                (year, school),
+            )
+
     df.to_sql(table_name, conn, if_exists="append", index=False)
 
     conn.commit()
