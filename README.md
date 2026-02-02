@@ -23,10 +23,10 @@ By organizing all PAC stats into a single dataset, this project creates opportun
 - SQLAlchemy  
 - Matplotlib  
 - Streamlit  
-- plotly>=6.3.1
-- webdriver-manager>=4.0
-
+- plotly
+- webdriver-manager
 ---
+
 ## Notice
 
 Everything can be run from VS Code terminal
@@ -67,9 +67,14 @@ You will know you have done everything correct, if after running the previous co
 
 If you run the grabber locally using  ```uv run grabber.py``` you will be met with a few to many csv files then you would want. Thus I created a clean file that takes 5 second to clean csv files. To run cleaner just run  ```uv run clean.py``` and you can adjust time of cleaner by changing the number housed in the variable called *time*.
 
+#### Data Issue
+
+If you run into a scenarion in which your data or the data you are looking for is not there, you may have to type a few letters in to see your name. If this is the case you should see your name mispelled. If you want to fix this issue you can download ***DB Browser*** this will allow you to directly access the database and make changes. This is not an issue with the tool however on the PAC site certain names that were input into their database were wrong.
+
 ##### Issue
 
 Please leave any issues in the issue tracker or send me an email at Hopkins02@allegheny.edu
+
 
 
 
