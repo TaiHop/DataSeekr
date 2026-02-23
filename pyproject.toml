@@ -18,6 +18,6 @@ dependencies = [
     # Data / DB
     
     "pandas>=2.2",
-    "sqlalchemy>=2.0",
+    # "sqlalchemy>=2.0",
 ]
 
