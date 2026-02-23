@@ -25,8 +25,8 @@ TEAMS = {
 
 # --- Important stats per section ---
 IMPORTANT_STATS = {
-    "hitting": ["AVG", "AB", "R", "H"],
-    "pitching": ["ERA", "W-L", "IP"],
+    "hitting": ["AVG", "AB", "R", "H", "RBI"],
+    "pitching": ["ERA", "W-L", "IP", "SO"],
     "fielding": ["FLD%", "C", "E"]  # fielding percentage, total chances, errors
 }
 
@@ -36,9 +36,11 @@ COLUMN_MAP = {
     "AB": "ab",
     "R": "runs",
     "H": "hits",
+    "RBI": "rbi",
     "ERA": "era",
     "W-L": "wl",
     "IP": "ip",
+    "SO": "so",
     "FLD%": "fld_pct",
     "C": "total_chances",
     "E": "errors"
@@ -123,7 +125,7 @@ def write_csv(players: List[Player], filename: str, year: int):
     print(f"✅ Wrote {len(players)} players → {filename}")
 
 
-def scrape_team(team_code: str, team_name: str, year: int = 2025):  # int should be year of current scrape
+def scrape_team(team_code: str, team_name: str, year: int = 2026):# int=year of current scrape
     print(f"\n🚀 Scraping {team_name} ({year})")
 
     url = f"https://pacathletics.org/teamstats.aspx?path=baseball&year={year}&school={team_code}"
@@ -154,7 +156,7 @@ def scrape_team(team_code: str, team_name: str, year: int = 2025):  # int should
 
 
 def main():
-    year = 2025
+    year = 2026
     for team_code, team_name in TEAMS.items():
         scrape_team(team_code, team_name, year)
         time.sleep(5)
