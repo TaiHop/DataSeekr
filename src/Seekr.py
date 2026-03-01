@@ -3,6 +3,7 @@ import pandas as pd  # type: ignore
 import streamlit as st  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
 from matplotlib import ticker  # type: ignore
+import re
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -43,8 +44,9 @@ SECTION_STATS = {
     "Fielding": ["fld_pct", "total_chances", "errors"]
 }
 
-
 # ---------------- UTIL ----------------
+
+
 def clean_numeric(series: pd.Series, is_percent=False):
     s = series.astype(str).str.replace(",", "").str.strip()
     if is_percent:
@@ -52,53 +54,61 @@ def clean_numeric(series: pd.Series, is_percent=False):
     return pd.to_numeric(s, errors="coerce")
 
 
-# ---------------- SEARCH FUNCTION (UNCHANGED LOGIC) ----------------
-def search_and_plot(name: str, section: str):
-    import re
+def normalize_name(name):
+    name = name.lower()
+    name = re.sub(r'\.', '', name)
+    parts = name.split()
+    if len(parts) >= 2:
+        first_initial = parts[0][0]
+        last = parts[-1]
+        return f"{first_initial} {last}"
+    return name
 
-    def normalize_name(name):
-        name = name.lower()
-        name = re.sub(r'\.', '', name)
-        parts = name.split()
-        if len(parts) >= 2:
-            first_initial = parts[0][0]
-            last = parts[-1]
-            return f"{first_initial} {last}"
-        return name
+
+# ---------------- DATABASE INITIALIZATION (RUN ONCE) ----------------
+def initialize_database():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    for table in SECTION_MAP.values():
+
+        # Check if canonical_name exists
+        cur.execute(f"PRAGMA table_info({table})")
+        cols = [col[1] for col in cur.fetchall()]
+
+        if "canonical_name" not in cols:
+            cur.execute(f"ALTER TABLE {table} ADD COLUMN canonical_name TEXT;")
+
+        # Bulk update only NULL rows
+        cur.execute(f"""
+            UPDATE {table}
+            SET canonical_name =
+                LOWER(SUBSTR(name, 1, 1) || ' ' ||
+                SUBSTR(name, INSTR(name, ' ') + 1))
+            WHERE canonical_name IS NULL
+        """)
+
+    conn.commit()
+    conn.close()
+
+
+# Run once when app loads
+initialize_database()
+
+
+# ---------------- SEARCH FUNCTION ----------------
+def search_and_plot(name: str, section: str):
 
     table = SECTION_MAP[section]
     stats_to_plot = SECTION_STATS[section]
 
     conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
 
-    # Ensure canonical_name column exists
-    cur.execute(f"PRAGMA table_info({table})")
-    cols = [col[1] for col in cur.fetchall()]
-
-    if "canonical_name" not in cols:
-        cur.execute(f"ALTER TABLE {table} ADD COLUMN canonical_name TEXT;")
-        conn.commit()
-
-    # Build canonical_name only where NULL
-    rows = cur.execute(
-        f"SELECT id, name FROM {table} WHERE canonical_name IS NULL"
-    ).fetchall()
-
-    for row_id, name_val in rows:
-        canonical = normalize_name(name_val)
-        cur.execute(
-            f"UPDATE {table} SET canonical_name=? WHERE id=?",
-            (canonical, row_id)
-        )
-
-    conn.commit()
-
-    # Search using normalized format
     search_normalized = normalize_name(name)
 
     query = f"""
-        SELECT * FROM {table}
+        SELECT *
+        FROM {table}
         WHERE canonical_name = ?
         ORDER BY year
     """
@@ -129,7 +139,7 @@ def search_and_plot(name: str, section: str):
         if stat not in df.columns or df[stat].dropna().empty:
             continue
 
-        fig, ax = plt.subplots(figsize=(5, 2.5))  # smaller graph
+        fig, ax = plt.subplots(figsize=(5, 2.5))
 
         ax.plot(df["year"], df[stat], marker="o")
         ax.set_xlabel("Year", fontsize=8)
@@ -156,10 +166,12 @@ with col1:
     )
 
 with col2:
-    section = st.selectbox(
+    sections = st.multiselect(
         "Section",
-        options=list(SECTION_MAP.keys())
+        options=list(SECTION_MAP.keys()),
+        default=list(SECTION_MAP.keys())
     )
 
-if player_name and section:
-    search_and_plot(player_name, section)
+if player_name and sections:
+    for sec in sections:
+        search_and_plot(player_name, sec)
