@@ -20,13 +20,14 @@ TEAMS = {
     "bet": "Bethany",
     "way": "Waynesburg",
     "fra": "Franciscan",
-    "gen": "Geneva"
+    "gen": "Geneva",
+    "hir": "Hiram"
 }
 
 # --- Important stats per section ---
 IMPORTANT_STATS = {
     "hitting": ["AVG", "AB", "R", "H", "RBI"],
-    "pitching": ["ERA", "W-L", "IP", "SO"],
+    "pitching": ["ERA", "W-L", "IP", "SO", "BB"],
     "fielding": ["FLD%", "C", "E"]  # fielding percentage, total chances, errors
 }
 
@@ -41,6 +42,7 @@ COLUMN_MAP = {
     "W-L": "wl",
     "IP": "ip",
     "SO": "so",
+    "BB": "bb",
     "FLD%": "fld_pct",
     "C": "total_chances",
     "E": "errors"
