@@ -117,10 +117,12 @@ def get_player(team, section):
     table = f"{section}_stats"
     cols = ["name"] + [COLUMN_MAP[s] for s in IMPORTANT_STATS[section]]
 
+    # ✅ FILTER BY YEAR 2026 ADDED HERE
     query = f"""
     SELECT {",".join(cols)}
     FROM {table}
     WHERE school = ?
+      AND year = 2026
     ORDER BY RANDOM()
     LIMIT 1
     """
