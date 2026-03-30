@@ -256,7 +256,7 @@ def run_test(test_num):
 # ------------------------
 
 def main():
-    total = 20
+    total = 50
     passed = 0
 
     for i in range(1, total + 1):
