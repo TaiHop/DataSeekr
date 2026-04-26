@@ -52,7 +52,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-DB_PATH = "statdb.db"
+DB_PATH = "src/statdb.db"
 
 
 # ---------------- SECTION MAPS ----------------
