@@ -12,6 +12,8 @@ The reason for this experiment is to address the difficulty of finding PAC stats
 
 By organizing all PAC stats into a single dataset, this project creates opportunities for analysis, comparison, and visualization. Coaches, players, and researchers can more easily track performance over multiple years, identify trends, and make data-driven decisions.
 
+Here is a link to the player search engine I created : https://afrcnsdomain.streamlit.app/
+
 ---
 
 ## Tools
